@@ -1,0 +1,50 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #a0b3f3;
+}
+
+h1 {
+    color: white;
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.button-group {
+    display: flex;
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.button-group a {
+    text-decoration: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.button-group .login {
+    background: white;
+    color: #728cff;
+    border: 2px solid white;
+}
+
+
+.button-group .register {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
