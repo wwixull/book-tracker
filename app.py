@@ -62,7 +62,55 @@ def admin_page():
 
 @app.route('/main_page')
 def main_page():
-    return render_template('main_page.html')
+    if "user_id" not in session:
+        return redirect(url_for("login_page"))
+    
+    books_db = database.get_books(session["user_id"])
+    login = session["login"]
+    return render_template("main_page.html", username=login, books=books_db)
+
+@app.route("/add", methods=["POST"])
+def add_book():
+    if "user_id" not in session:
+        return redirect(url_for("login_page"))
+
+    book_title = request.form["book-title"]
+    book_author = request.form["book-author"]
+    database.add_book(book_title, book_author, session["user_id"])
+    return redirect(url_for("main_page"))
+
+@app.route("/delete_book", methods=["POST"])
+def delete_book():
+    if "user_id" not in session:
+        return redirect(url_for("login_page"))
+    
+    book_id = int(request.form["book-id"])
+    database.delete_book(book_id, session["user_id"])
+    return redirect(url_for("main_page"))
+
+@app.route("/change_book_status", methods=["POST"])
+def change_book_status():
+    if "user_id" not in session:
+        return redirect(url_for("login_page"))
+    
+    book_id = int(request.form["book-id"])
+    new_status = int(request.form["book-status"]) 
+    
+    database.change_book_status(book_id, session["user_id"], new_status)
+    return redirect(url_for("main_page"))
+
+@app.route("/update_book_mark", methods=["POST"])
+def change_book_mark():
+    if "user_id" not in session:
+        return redirect(url_for("login_page"))
+    
+    book_id = int(request.form["book-id"])
+    new_mark = int(request.form["book-mark"])
+    
+    if 1 <= new_mark <= 10:
+        database.change_book_mark(book_id, session["user_id"], new_mark)
+    
+    return redirect(url_for("main_page"))
         
 if __name__ == '__main__':
     app.run(debug=True)

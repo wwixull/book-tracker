@@ -80,5 +80,112 @@ def auth_user(login, password):
         return user[0]
     return -1
 
+def add_book(title, author, user_id):
+    conn = sqlite3.connect("books.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO book (title, author, status, user_id, mark)
+        VALUES (?, ?, ?, ?, ?)
+        """, (title, author, 0, user_id, 0)
+    )
+
+    book_id = cursor.lastrowid
+
+    cursor.execute(
+        """
+        INSERT INTO user_book (status, mark, user_id, book_id)
+        VALUES (?, ?, ?, ?)
+        """, (0, 0, user_id, book_id)
+    )
+
+    conn.commit()
+
+def get_books(user_id):
+    conn = sqlite3.connect("books.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT id, title, author, status, mark, user_id FROM book WHERE user_id=?", (user_id,))
+    books = cursor.fetchall()
+    conn.close()
+    return books
+
+def delete_book(book_id, user_id):
+    conn = sqlite3.connect("books.db")
+    cursor = conn.cursor()
+    
+    cursor.execute(
+            """
+            SELECT id FROM book 
+            WHERE id = ? AND user_id = ?
+            """,
+            (book_id, user_id)
+        )
+        
+    if not cursor.fetchone():
+        return False, "Книга не найдена"
+        
+    cursor.execute(
+            "DELETE FROM user_book WHERE book_id = ? AND user_id = ?",
+            (book_id, user_id)
+        )
+        
+    cursor.execute(
+            "DELETE FROM book WHERE id = ? AND user_id = ?",
+            (book_id, user_id)
+        )
+        
+    conn.commit()
+
+def change_book_status(book_id, user_id, new_status):
+    conn = sqlite3.connect("books.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+            """
+            UPDATE book 
+            SET status = ? 
+            WHERE id = ? AND user_id = ?
+            """,
+            (new_status, book_id, user_id)
+        )
+        
+    cursor.execute(
+            """
+            UPDATE user_book 
+            SET status = ? 
+            WHERE book_id = ? AND user_id = ?
+            """,
+            (new_status, book_id, user_id)
+        )
+         
+    conn.commit()
+
+def change_book_mark(book_id, user_id, new_mark):
+    conn = sqlite3.connect("books.db")
+    cursor = conn.cursor()
+
+    # Обновляем в таблице book
+    cursor.execute(
+        """
+        UPDATE book
+        SET mark = ?
+        WHERE id = ? AND user_id = ?
+        """, (new_mark, book_id, user_id)
+    )
+
+    # Обновляем в таблице user_book
+    cursor.execute(
+        """
+        UPDATE user_book
+        SET mark = ?
+        WHERE book_id = ? AND user_id = ?
+        """, (new_mark, book_id, user_id)
+    )
+
+    conn.commit()
+
+
 if __name__ == "__main__":
     create_db()

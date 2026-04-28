@@ -3,9 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Book Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main-style.css') }}">
 </head>
 <body>
-    <h1>Документ</h1>
+    <h1>Список книг</h1>
+    <form action="/add" method="POST">
+        <label for="new-book">Название книги</label>
+        <input type="text" id="new-book" name="book-title" placeholder="Введите название книги" required>
+        <label for="book-author">Автор</label>
+        <input type="text" id="book-author" name="book-author" placeholder="Введите автора" required>
+        <input type="submit" value="Добавить книгу">
+    </form>
+    <div class="container">
+
+    {% for book in books %}
+    <div class="case">
+        <p class="book-title"><strong>{{ book[1] }}</strong> — {{ book[2] }}</p>
+        
+        <p class="book-status">
+            Статус: 
+            {% if book[3] == 0 %}📌 План
+            {% elif book[3] == 1 %}✅ Прочитано
+            {% elif book[3] == 2 %}⚙️ В процессе
+            {% elif book[3] == 3 %}⏸️ Отложено
+            {% elif book[3] == 4 %}💔 Брошено
+            {% endif %}
+        </p>
+        
+        <p class="book-mark">
+            {% if book[4] > 0 %}
+            ⭐ Ваша оценка: {{ book[4] }} ⭐
+            {% else %}
+            📝 Оценка не поставлена
+            {% endif %}
+        </p>
+
+        <form action="/change_book_status" method="POST">
+            <select name="book-status">
+                <option value="0" {% if book[3] == 0 %}selected{% endif %}>📌 План</option>
+                <option value="1" {% if book[3] == 1 %}selected{% endif %}>✅ Прочитано</option>
+                <option value="2" {% if book[3] == 2 %}selected{% endif %}>⚙️ В процессе</option>
+                <option value="3" {% if book[3] == 3 %}selected{% endif %}>⏸️ Отложено</option>
+                <option value="4" {% if book[3] == 4 %}selected{% endif %}>💔 Брошено</option>
+            </select>
+            <button type="submit">Изменить статус</button>
+            <input type="hidden" name="book-id" value="{{ book[0] }}">
+        </form>
+
+        <form action="/update_book_mark" method="POST">
+            <input type="number" name="book-mark" min="1" max="10" value="1" placeholder="Оценка 1-10">
+            <button type="submit">Оценить</button>
+            <input type="hidden" name="book-id" value="{{ book[0] }}">
+        </form>
+
+        <form action="/delete_book" method="POST">
+            <button type="submit">Удалить</button>
+            <input type="hidden" name="book-id" value="{{ book[0] }}">
+        </form>
+    </div>
+    <hr>
+    {% endfor %}
+    </div>
 </body>
 </html>
