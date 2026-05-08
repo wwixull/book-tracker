@@ -54,6 +54,11 @@ def login_page():
             print("Что-то не так")
             return render_template("login.html", errors=["Неверный логин или пароль"])
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login_page"))
+
 @app.route("/admin")
 def admin_page():
     users = database.get_users()

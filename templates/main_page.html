@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main-style.css') }}">
 </head>
 <body>
+    <div class="logout-button">
+        <a href="{{ url_for('logout') }}" class="logout-link">Выйти</a>
+    </div>
     <h1>Список книг</h1>
     <form action="/add" method="POST">
         <label for="new-book">Название книги</label>
@@ -16,7 +19,6 @@
         <input type="submit" value="Добавить книгу">
     </form>
     <div class="container">
-
     {% for book in books %}
     <div class="case">
         <p class="book-title"><strong>{{ book[1] }}</strong> — {{ book[2] }}</p>
