@@ -11,17 +11,27 @@
         <a href="{{ url_for('logout') }}" class="logout-link">Выйти</a>
     </div>
     <h1>Список книг</h1>
-    <form action="/add" method="POST">
+    <form action="/add" method="POST" enctype="multipart/form-data">
         <label for="new-book">Название книги</label>
         <input type="text" id="new-book" name="book-title" placeholder="Введите название книги" required>
         <label for="book-author">Автор</label>
         <input type="text" id="book-author" name="book-author" placeholder="Введите автора" required>
+        <label for="image">Изображение</label><br>
+        <input type="file" id="image" name="image" required>
         <input type="submit" value="Добавить книгу">
     </form>
+
     <div class="container">
     {% for book in books %}
     <div class="case">
-        <p class="book-title"><strong>{{ book[1] }}</strong> — {{ book[2] }}</p>
+        {% if book[5] and book[5] != 'nobook.png' %}
+            <img class="book-image" src="/static/uploads/{{ book[5] }}" alt="Обложка">
+        {% else %}
+            <img class="book-image" src="/static/img/nobook.png" alt="Обложка">
+        {% endif %}
+            
+            <p class="book-title">{{ book[1] }}</p>
+            <p class="book-author">{{ book[2] }}</p>
         
         <p class="book-status">
             Статус: 

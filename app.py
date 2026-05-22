@@ -1,8 +1,14 @@
 from flask import Flask, request, redirect, url_for, render_template, session
 import database 
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 app.secret_key = "oidjwoiqj./uqj0q9/871d23hqd45f6"
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
@@ -74,14 +80,26 @@ def main_page():
     login = session["login"]
     return render_template("main_page.html", username=login, books=books_db)
 
-@app.route("/add", methods=["POST"])
+@app.route("/add", methods=["GET", "POST"])
 def add_book():
     if "user_id" not in session:
         return redirect(url_for("login_page"))
+    
+    if request.method == "GET":
+        return render_template("add_book.html")
 
-    book_title = request.form["book-title"]
-    book_author = request.form["book-author"]
-    database.add_book(book_title, book_author, session["user_id"])
+    title = request.form['book-title']
+    author = request.form['book-author']
+    image = request.files.get('image')
+
+    image_path = "nobook.png"
+    
+    if image and image.filename != '':
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        image_path = filename
+        
+    database.add_book(title, author, session["user_id"], image_path)
     return redirect(url_for("main_page"))
 
 @app.route("/delete_book", methods=["POST"])

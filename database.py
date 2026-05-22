@@ -23,6 +23,7 @@ def create_db():
                    status INTEGER DEFAULT 0,
                    user_id INTEGER,
                    mark INTEGER DEFAULT 0,
+                   image_path TEXT DEFAULT 'static/img/nobook.png',
                    FOREIGN KEY (user_id) REFERENCES user (id)
                    )
     ''')
@@ -80,15 +81,18 @@ def auth_user(login, password):
         return user[0]
     return -1
 
-def add_book(title, author, user_id):
+def add_book(title, author, user_id, image_path=None):
     conn = sqlite3.connect("books.db")
     cursor = conn.cursor()
 
+    if not image_path:
+        image_path = "nobook.png"
+
     cursor.execute(
         """
-        INSERT INTO book (title, author, status, user_id, mark)
-        VALUES (?, ?, ?, ?, ?)
-        """, (title, author, 0, user_id, 0)
+        INSERT INTO book (title, author, status, user_id, mark, image_path)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (title, author, 0, user_id, 0, image_path)
     )
 
     book_id = cursor.lastrowid
@@ -106,7 +110,7 @@ def get_books(user_id):
     conn = sqlite3.connect("books.db")
     cursor = conn.cursor()
     
-    cursor.execute("SELECT id, title, author, status, mark, user_id FROM book WHERE user_id=?", (user_id,))
+    cursor.execute("SELECT id, title, author, status, mark, image_path FROM book WHERE user_id=?", (user_id,))
     books = cursor.fetchall()
     conn.close()
     return books
@@ -115,6 +119,21 @@ def delete_book(book_id, user_id):
     conn = sqlite3.connect("books.db")
     cursor = conn.cursor()
     
+    cursor.execute(
+        "SELECT image_path FROM book WHERE id = ? AND user_id = ?",
+        (book_id, user_id)
+    )
+    result = cursor.fetchone()
+
+    if not result:
+        conn.close()
+        return False, "Книга не найдена"
+    
+    image_path = result[0]
+
+    if image_path and image_path != "static/img/nobook.png" and os.path.exists(image_path):
+        os.remove(image_path)
+
     cursor.execute(
             """
             SELECT id FROM book 
